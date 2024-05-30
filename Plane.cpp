@@ -18,6 +18,7 @@ namespace PUMA
 	{
 		glDeleteVertexArrays(1, &m_gl_VAO);
 		glDeleteBuffers(1, &m_gl_VBO);
+		glDeleteBuffers(1, &m_gl_TBO);
 		glDeleteBuffers(1, &m_gl_EBO);
 	}
 
@@ -26,6 +27,15 @@ namespace PUMA
 		glBindVertexArray(m_gl_VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
+	}
+
+	void Plane::Draw(unsigned int& texture) const
+	{
+		glBindVertexArray(m_gl_VAO);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		glBindVertexArray(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	std::vector<vec3> Plane::GenerateVerticesNormals(const float& width, const float& height)
@@ -47,6 +57,16 @@ namespace PUMA
 		};
 	}
 
+	std::vector<glm::vec2> Plane::GenerateTexCoords()
+	{
+		return {
+			{1.f, 1.f},
+			{0.f, 1.f},
+			{0.f, 0.f},
+			{1.f, 0.f},
+		};
+	}
+
 	std::vector<unsigned int> Plane::GenerateIndices()
 	{
 		return {
@@ -60,10 +80,12 @@ namespace PUMA
 		// Generate buffers
 		glGenVertexArrays(1, &m_gl_VAO);
 		glGenBuffers(1, &m_gl_VBO);
+		glGenBuffers(1, &m_gl_TBO);
 		glGenBuffers(1, &m_gl_EBO);
 
 		// Bind buffers to VAO and populate them
 		std::vector<vec3>			vertNorm	= GenerateVerticesNormals(width, height);
+		std::vector<vec2>			texCoords		= GenerateTexCoords();
 		std::vector<unsigned int>	indices		= GenerateIndices();
 
 		glBindVertexArray(m_gl_VAO);
@@ -80,6 +102,10 @@ namespace PUMA
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 
+		glBindBuffer(GL_ARRAY_BUFFER, m_gl_TBO);
+		glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(glm::vec2), texCoords.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(2);
 		// Unbind everything from context
 
 		glBindVertexArray(0);

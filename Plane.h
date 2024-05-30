@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 // Includes (prog)
 
@@ -25,6 +26,7 @@ namespace PUMA
 
 			GLuint m_gl_VAO;
 			GLuint m_gl_VBO;
+			GLuint m_gl_TBO;
 			GLuint m_gl_EBO;
 
 		public:
@@ -39,10 +41,12 @@ namespace PUMA
 			~Plane();
 
 			void Draw();
+			void Draw(unsigned int& texture) const;
 
 		private:
 
 			std::vector<glm::vec3> GenerateVerticesNormals(const float& width, const float& height);
+			std::vector<glm::vec2> GenerateTexCoords();
 			std::vector<unsigned int> GenerateIndices();
 
 			void InitGL(const float& width, const float& height);

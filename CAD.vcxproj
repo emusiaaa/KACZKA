@@ -158,6 +158,7 @@
     <ClInclude Include="Kaczka.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="WaterDisturber.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.frag" />
@@ -166,6 +167,8 @@
     <None Include="kaczka.vert" />
     <None Include="phong.frag" />
     <None Include="phong.vert" />
+    <None Include="water.frag" />
+    <None Include="water.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="model\duck.txt" />
@@ -178,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="model\ducktex.jpg" />
+    <Image Include="model\normal2.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

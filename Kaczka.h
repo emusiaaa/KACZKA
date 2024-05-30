@@ -75,4 +75,4 @@ namespace KACZKA
 			void InitGL();
 	};
 
-} // PUMA
+}

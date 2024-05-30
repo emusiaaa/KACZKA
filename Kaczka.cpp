@@ -34,6 +34,7 @@ namespace KACZKA
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glDrawElements(GL_TRIANGLES, 3 * (GLsizei)m_mesh_triangles.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void Kaczka::ReadMeshData(const char* filePath) {

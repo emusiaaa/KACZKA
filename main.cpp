@@ -26,6 +26,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
+void generateTexture(unsigned int& texture, const char* path);
 
 Camera camera = Camera();
 int SCR_WIDTH = 800;
@@ -113,21 +114,9 @@ int main()
 
 		PathMaker pathMaker = PathMaker();
 
-		int width, height, nrChannels;
-		unsigned char* data = stbi_load("model/ducktex.jpg", &width, &height, &nrChannels, 0);
-		unsigned int texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else
-		{
-			std::cout << "Failed to load texture" << std::endl;
-		}
-		stbi_image_free(data);
+		unsigned int duckTexture, waterNormalsTexture;
+		generateTexture(duckTexture, "model/ducktex.jpg");
+		generateTexture(waterNormalsTexture, "model/normal2.png");
 
 		// Room Planes
 		PUMA::Plane roomPlanes[6] = {
@@ -162,7 +151,7 @@ int main()
 
 		PUMA::Plane water(ROOM_WIDTH, ROOM_HEIGHT);
 		glm::mat4 water_mtx = glm::mat4(1.0f);
-		glm::vec3 water_color = glm::vec3(0.f, 1.0f, 1.0f);
+		glm::vec3 water_color = glm::vec3(0.f, .41f, .58f);
 
 		// Light
 		Light sceneLight;
@@ -182,6 +171,7 @@ int main()
 		// Create Shaders
 		// *=*=*=*=*=*=*=*=*=*=*
 		ShaderProgram KaczkaShader("kaczka.vert", "kaczka.frag");
+		ShaderProgram WaterShader("water.vert", "water.frag");
 		ShaderProgram PhongShader("phong.vert", "phong.frag");
 
 		// *=*=*=*=*
@@ -226,7 +216,27 @@ int main()
 			KaczkaShader.setVec3("objectColor", robotColor);
 			KaczkaShader.setMat4("model", duck.ModelMtx() * rotationMatrix);
 			
-			duck.Draw(texture);
+			duck.Draw(duckTexture);
+
+			WaterShader.use();
+
+			WaterShader.setVec3("cameraPos", camera.position);
+			WaterShader.setMat4("view", view);
+			WaterShader.setMat4("proj", projection);
+
+			WaterShader.setVec3("ambientColor", ambientColor);
+			WaterShader.setVec3("light.position", sceneLight.position);
+			WaterShader.setVec3("light.diffuseColor", sceneLight.diffuseColor);
+			WaterShader.setVec3("light.specularColor", sceneLight.specularColor);
+
+			WaterShader.setVec3("material.ka", defaultMaterial.ka);
+			WaterShader.setVec3("material.kd", defaultMaterial.kd);
+			WaterShader.setVec3("material.ks", defaultMaterial.ks);
+			WaterShader.setFloat("material.shininess", defaultMaterial.shininess);
+
+			WaterShader.setVec3("objectColor", water_color);
+			WaterShader.setMat4("model", water_mtx);
+			water.Draw(waterNormalsTexture);
 
 			PhongShader.use();
 
@@ -243,10 +253,6 @@ int main()
 			PhongShader.setVec3("material.kd", defaultMaterial.kd);
 			PhongShader.setVec3("material.ks", defaultMaterial.ks);
 			PhongShader.setFloat("material.shininess", defaultMaterial.shininess);
-
-			PhongShader.setVec3("objectColor", water_color);
-			PhongShader.setMat4("model", water_mtx);
-			water.Draw();
 
 			PhongShader.setVec3("objectColor", roomColor);
 			for (int i = 0; i < 6; i++)
@@ -328,4 +334,22 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.radius -= yoffset * 5;
 	if (camera.radius < 0.1) camera.radius = 0.1;
 	camera.updateCameraVectors();
+}
+
+void generateTexture(unsigned int& texture, const char* path) {
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

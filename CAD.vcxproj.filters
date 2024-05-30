@@ -16,6 +16,9 @@
     <Filter Include="Resource Files\model">
       <UniqueIdentifier>{84be7f0c-556f-4ebe-8844-5132c6ebabc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{7b4aff5b-6d49-4ff5-b1e7-2762dbef3bad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -59,21 +62,34 @@
     <ClInclude Include="PathMaker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WaterDisturber.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="basic.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="basic.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="kaczka.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="kaczka.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="water.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="water.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
     <None Include="phong.frag">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="phong.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="kaczka.vert" />
-    <None Include="kaczka.frag" />
-    <None Include="basic.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="basic.vert">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +117,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="model\ducktex.jpg">
+      <Filter>Resource Files\model</Filter>
+    </Image>
+    <Image Include="model\normal2.png">
       <Filter>Resource Files\model</Filter>
     </Image>
   </ItemGroup>
