@@ -64,11 +64,6 @@ namespace KACZKA
 			Kaczka(const char* path);
 			~Kaczka();
 
-			Kaczka(const Kaczka&) = delete;
-			Kaczka& operator=(const Kaczka&) = delete;
-			Kaczka(Kaczka&&) noexcept;
-			Kaczka& operator=(Kaczka&&) noexcept;
-
 			void Draw(unsigned int& texture) const;
 			glm::mat4 ModelMtx() {
 				return Translate(translation.x, translation.y, translation.z) * Scale(scale);

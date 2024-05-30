@@ -136,18 +136,13 @@ public:
 	}
 	glm::vec3 randomPoint() {
 		std::random_device rd;
-		// Choose a random number generator
 		std::mt19937 gen(rd());
-		// Define the distribution for x and z
 		std::uniform_real_distribution<> dis(-WIDTH, WIDTH);
 
-		// Generate random x and z
 		float x = dis(gen);
 		float z = dis(gen);
-		// y is always 0
 		float y = 0.0f;
 
-		// Return the random point
 		return glm::vec3(x, y, z);
 	}
 	void draw(glm::mat4 view, glm::mat4 projection) {

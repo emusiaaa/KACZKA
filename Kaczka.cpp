@@ -24,37 +24,8 @@ namespace KACZKA
 		glDeleteVertexArrays(1, &m_gl_VAO);
 		glDeleteBuffers(1, &m_gl_VBO);
 		glDeleteBuffers(1, &m_gl_NBO);
+		glDeleteBuffers(1, &m_gl_TBO);
 		glDeleteBuffers(1, &m_gl_EBO);
-	}
-
-	Kaczka::Kaczka(Kaczka&& moved) noexcept
-		: 
-		m_mesh_vertexPositions(std::move(moved.m_mesh_vertexPositions)),
-		m_mesh_normals(std::move(moved.m_mesh_normals)),
-		m_mesh_triangles(std::move(moved.m_mesh_triangles))
-	{
-		m_gl_VAO = moved.m_gl_VAO;
-		m_gl_VBO = moved.m_gl_VBO;
-		m_gl_NBO = moved.m_gl_NBO;
-		m_gl_EBO = moved.m_gl_EBO;
-
-		moved.m_gl_VAO = moved.m_gl_VBO = moved.m_gl_NBO = moved.m_gl_EBO = 0;
-	}
-
-	Kaczka& Kaczka::operator=(Kaczka&& moved) noexcept
-	{
-		m_mesh_vertexPositions	= std::move(moved.m_mesh_vertexPositions);
-		m_mesh_normals			= std::move(moved.m_mesh_normals);
-		m_mesh_triangles		= std::move(moved.m_mesh_triangles);
-
-		m_gl_VAO = moved.m_gl_VAO;
-		m_gl_VBO = moved.m_gl_VBO;
-		m_gl_NBO = moved.m_gl_NBO;
-		m_gl_EBO = moved.m_gl_EBO;
-
-		moved.m_gl_VAO = moved.m_gl_VBO = moved.m_gl_NBO = moved.m_gl_EBO = 0;
-
-		return *this;
 	}
 
 	void Kaczka::Draw(unsigned int& texture) const

@@ -201,12 +201,10 @@ int main()
 			glm::mat4 projection = camera.projectionMatrix(SCR_HEIGHT, SCR_WIDTH);
 
 			t += deltaTime / 5.f;
-			//t = std::fmod((t + deltaTime / 10.0f), 1.0f);
 			duck.translation = pathMaker.calculateCurrentPosition(t);
 			glm::vec3 tangent = pathMaker.bezierTangent(t);
-
-			// Compute the rotation matrix to align the model
 			glm::mat4 rotationMatrix = pathMaker.alignModelToVector(tangent);
+
 			pathMaker.draw(view, projection);
 
 			KaczkaShader.use();
