@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #define GLM_ENABLE_EXPERIMENTAL
 #define STB_IMAGE_IMPLEMENTATION
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -16,6 +17,7 @@
 #include "Plane.h"
 #include "Kaczka.h"
 #include "PathMaker.h"
+#include "WaterDisturber.h"
 
 #include <vector>
 
@@ -113,10 +115,13 @@ int main()
 		glm::vec3 robotColor(0.8f);
 
 		PathMaker pathMaker = PathMaker();
+		WaterDisturber waterDisturber = WaterDisturber();
 
-		unsigned int duckTexture, waterNormalsTexture;
+		unsigned int duckTexture, waterNormalsTexture, waterTEX;
 		generateTexture(duckTexture, "model/ducktex.jpg");
-		generateTexture(waterNormalsTexture, "model/normal2.png");
+		generateTexture(waterNormalsTexture, "heightmap2.png");
+		glGenTextures(1, &waterTEX);
+		glBindTexture(GL_TEXTURE_2D, waterTEX);
 
 		// Room Planes
 		PUMA::Plane roomPlanes[6] = {
@@ -195,6 +200,10 @@ int main()
 			glm::vec3 tangent = pathMaker.bezierTangent(t);
 			glm::mat4 rotationMatrix = pathMaker.alignModelToVector(tangent);
 
+			int ii = static_cast<int>(((duck.translation.x + 250.f) / 500.0f) * 255.0f);
+			int jj = static_cast<int>(((-duck.translation.z + 250.f) / 500.0f) * 255.0f);
+			waterDisturber.disturb(jj, ii, waterTEX);
+
 			pathMaker.draw(view, projection);
 
 			KaczkaShader.use();
@@ -236,7 +245,10 @@ int main()
 
 			WaterShader.setVec3("objectColor", water_color);
 			WaterShader.setMat4("model", water_mtx);
-			water.Draw(waterNormalsTexture);
+			KaczkaShader.use();
+			KaczkaShader.setVec3("objectColor", water_color);
+			KaczkaShader.setMat4("model", water_mtx);
+			water.Draw(waterTEX);
 
 			PhongShader.use();
 

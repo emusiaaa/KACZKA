@@ -60,10 +60,10 @@ namespace PUMA
 	std::vector<glm::vec2> Plane::GenerateTexCoords()
 	{
 		return {
-			{1.f, 1.f},
-			{0.f, 1.f},
-			{0.f, 0.f},
 			{1.f, 0.f},
+			{0.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
 		};
 	}
 
