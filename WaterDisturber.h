@@ -33,7 +33,16 @@ public:
 		Z_N.resize(N, std::vector<float>(N));
 		Z_N_1.resize(N, std::vector<float>(N));
 		Z_N_plus_1.resize(N, std::vector<float>(N));
-		d.resize(N, std::vector<float>(N, 0.95f));
+		d.resize(N, std::vector<float>(N));
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				float l = fmin(i, N - i - 1);
+				l = fmin(fmin(l, j), N - 1 - j);
+				l = l * h;
+				d[i][j] = 0.95f * fmin(1, l / 0.2f);
+			}
+		}
 	};
 	~WaterDisturber() {};
 
@@ -87,16 +96,16 @@ public:
 		std::uniform_real_distribution<> dis1(0, 1.f);
 		std::uniform_int_distribution<> dis(0, 255);
 		float p = dis1(gen);
-		if(p > 0.85f)
+		if(p > 0.05f)
 		{
-			int ii = dis(gen);
+			int ii = 230;
 			int jj = dis(gen);
-			Z_N[ii][jj] = -1.f;
+			Z_N[ii][jj] -= .25f;
 		}
 	}
 	void disturb(int ii, int jj, unsigned int& tex) {
 		rain();
-		Z_N[ii][jj] = -1.f;
+		Z_N[ii][jj] -= .25f;
 		for (int i = 1; i < N - 1; i++) {
 			for (int j = 1; j < N - 1; j++) {
 				Z_N_plus_1[i][j] = d[i][j] * (A * (Z_N[i + 1][j] + Z_N[i-1][j] + Z_N[i][j-1] + Z_N[i][j + 1]) + B * Z_N[i][j] - Z_N_1[i][j]);
