@@ -29,13 +29,13 @@ namespace PUMA
 		glBindVertexArray(0);
 	}
 
-	void Plane::Draw(unsigned int& texture) const
+	void Plane::Draw(unsigned int& texture, GLenum textureType) const
 	{
 		glBindVertexArray(m_gl_VAO);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(textureType, texture);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(textureType, 0);
 	}
 
 	std::vector<vec3> Plane::GenerateVerticesNormals(const float& width, const float& height)
@@ -44,10 +44,10 @@ namespace PUMA
 
 		return {
 			// Vertices
-			{  width / 2, 0.0f,  height / 2 },	// 0
-			{ -width / 2, 0.0f,  height / 2 },	// 1
-			{ -width / 2, 0.0f, -height / 2 },	// 2
-			{  width / 2, 0.0f, -height / 2 },	// 3
+			{  1.f , 0.0f,  1.f  },	// 0
+			{ -1.f , 0.0f,  1.f  },	// 1
+			{ -1.f , 0.0f, -1.f  },	// 2
+			{  1.f , 0.0f, -1.f  },	// 3
 
 			// Normals
 			{ 0.f, 1.f, 0.f},	// 0
@@ -60,10 +60,10 @@ namespace PUMA
 	std::vector<glm::vec2> Plane::GenerateTexCoords()
 	{
 		return {
-			{1.f, 1.f},
-			{0.f, 1.f},
-			{0.f, 0.f},
 			{1.f, 0.f},
+			{0.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
 		};
 	}
 

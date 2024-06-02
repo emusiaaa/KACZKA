@@ -18,6 +18,7 @@ uniform vec3 ambientColor;
 uniform vec3 objectColor;
 uniform Light light;
 uniform Material material;
+uniform samplerCube skybox;
 
 layout (location = 0) in b_FS_in
 {
@@ -35,7 +36,8 @@ vec4 ComputePhongIllumination();
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 void main()
 {
-    FragColor = ComputePhongIllumination();
+    FragColor = texture(skybox, FS_in.fragWorldPos);
+    //FragColor = ComputePhongIllumination();
 } 
 // =*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 

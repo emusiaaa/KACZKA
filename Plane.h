@@ -41,7 +41,7 @@ namespace PUMA
 			~Plane();
 
 			void Draw();
-			void Draw(unsigned int& texture) const;
+			void Draw(unsigned int& texture, GLenum textureType = GL_TEXTURE_CUBE_MAP) const;
 
 		private:
 

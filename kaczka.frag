@@ -55,9 +55,11 @@ vec4 ComputePhongIllumination()
     // specular
     vec3 R = reflect(-L, N);
     vec3 V = normalize(cameraPos - FS_in.fragWorldPos);
-    vec3 specular = material.ks * light.specularColor * pow(max(dot(R, V), 0.0f), material.shininess);
+    vec3 H = normalize(L + V);
+    vec3 T = normalize(cross(N, vec3(1,0,0)));
+    vec3 anisotropic = material.ks * light.specularColor * pow(sqrt(1-pow(dot(T, H),2)), material.shininess);
 
     //return vec4(1.0,0.5,1.0f,1.0f);
     vec4 c = texture(ourTexture, FS_in.TexCoord);
-    return vec4((ambient + diffuse + specular) * c.xyz, 1.0f);
+    return vec4((ambient + anisotropic) * c.xyz, 1.0f);
 }
