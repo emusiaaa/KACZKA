@@ -81,8 +81,21 @@ public:
 
 		std::cout << "Height map saved as heightmap.png" << std::endl;
 	}
-
+	void rain() {
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_real_distribution<> dis1(0, 1.f);
+		std::uniform_int_distribution<> dis(0, 255);
+		float p = dis1(gen);
+		if(p > 0.85f)
+		{
+			int ii = dis(gen);
+			int jj = dis(gen);
+			Z_N[ii][jj] = -1.f;
+		}
+	}
 	void disturb(int ii, int jj, unsigned int& tex) {
+		rain();
 		Z_N[ii][jj] = -1.f;
 		for (int i = 1; i < N - 1; i++) {
 			for (int j = 1; j < N - 1; j++) {
@@ -97,33 +110,6 @@ public:
 			}
 		}
 		createNormalTexture(calculateNormals(), tex);
-		/*std::vector<unsigned char> image = convertHeightMapToImage();
-		glBindTexture(GL_TEXTURE_2D, tex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, N, N, 0, GL_RED, GL_UNSIGNED_BYTE, image.data());
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);*/
-	}
-	void disturb2(unsigned int& tex) {
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_int_distribution<> dis(0, 255);
-		int ii = dis(gen);
-		int jj = dis(gen);
-		Z_N[ii][jj] = -1.f;
-
-		for (int i = 1; i < N - 1; i++) {
-			for (int j = 1; j < N - 1; j++) {
-				Z_N_plus_1[i][j] = d[i][j] * (A * (Z_N[i + 1][j] + Z_N[i - 1][j] + Z_N[i][j - 1] + Z_N[i][j + 1]) + B * Z_N[i][j] - Z_N_1[i][j]);
-			}
-		}
-		for (size_t i = 0; i < N; ++i) {
-			for (size_t j = 0; j < N; ++j) {
-				Z_N_1[i][j] = Z_N[i][j];
-				Z_N[i][j] = Z_N_plus_1[i][j];
-			}
-		}
-		
-		//createNormalTexture(calculateNormals(), tex);
 		/*std::vector<unsigned char> image = convertHeightMapToImage();
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, N, N, 0, GL_RED, GL_UNSIGNED_BYTE, image.data());
@@ -188,59 +174,18 @@ public:
 	void createNormalTexture(const std::vector<std::vector<glm::vec3>>& normals, unsigned int& tex) {
 		int height = normals.size();
 		int width = normals[0].size();
-		std::vector<float> data(N * N * 4);
-		// Flatten the 2D vector to a 1D array and encode normals to 8-bit values
+
 		std::vector<glm::u8vec3> normalMap(width * height);
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
 				int index = (y * N + x) * 4;
-				//data[index + 0] = normals[y][x].x *0.5f + 0.5f;	// R
-				//data[index + 1] = normals[y][x].y *0.5f + 0.5f; // waterHeights_current[y][x];//rand()/(float) RAND_MAX; // G
-				//data[index + 2] = normals[y][x].z *0.5f + 0.5f;	// B
-				//data[index + 3] = 1.f;	// A
 				normalMap[y * width + x] = encodeNormal(normals[y][x]);
 			}
 		}
 
-		//// Create and upload the texture
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, normalMap.data());
 		glGenerateMipmap(GL_TEXTURE_2D);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		//std::vector<float> data(N * N * 4); // 4 kana³y (RGBA)
-		//for (int y = 1; y < N - 1; y++) {
-		//	for (int x = 1; x < N - 1; x++) {
-		//		float heightL = Z_N_plus_1[y][x - 1];
-		//		float heightR = Z_N_plus_1[y][x + 1];
-		//		float heightD = Z_N_plus_1[y - 1][x];
-		//		float heightU = Z_N_plus_1[y + 1][x];
-
-		//		glm::vec3 dx = glm::normalize(glm::vec3(1.0f, heightR - heightL, 0.0f));
-		//		glm::vec3 dz = glm::normalize(glm::vec3(0.0f, heightU - heightD, 1.0));
-		//		glm::vec3 normal = glm::normalize(glm::cross(dz, dx));
-
-		//		normal = normal * 0.5f + 0.5f;
-		//		int index = (y * N + x) * 4;
-		//		data[index + 0] = normal.x;	// R
-		//		data[index + 1] = normal.y; // waterHeights_current[y][x];//rand()/(float) RAND_MAX; // G
-		//		data[index + 2] = normal.z;	// B
-		//		data[index + 3] = 1.0f;	// A
-		//	}
-		//}
-		//data[0] = 0.5f;	// R
-		//data[1] = 1.0f; // waterHeights_current[y][x];//rand()/(float) RAND_MAX; // G
-		//data[2] = 0.5f;	// B
-		//data[3] = 1.0f;	// A
-
-		//glBindTexture(GL_TEXTURE_2D, tex);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, data.data());
-		//glGenerateMipmap(GL_TEXTURE_2D);
-		///*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);*/
-		//glBindTexture(GL_TEXTURE_2D, 0);
-
 	}
 };

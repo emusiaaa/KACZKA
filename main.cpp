@@ -124,6 +124,15 @@ int main()
 		glGenTextures(1, &waterTEX);
 		glBindTexture(GL_TEXTURE_2D, waterTEX);
 
+		/*std::vector<std::string> faces
+		{
+			"model/skybox2/right.png",
+			"model/skybox2/left.png",
+			"model/skybox2/top.png",
+			"model/skybox2/bottom.png",
+			"model/skybox2/front.png",
+			"model/skybox2/back.png"
+		};*/
 		std::vector<std::string> faces
 		{
 			"model/skybox/right.jpg",
@@ -244,7 +253,7 @@ int main()
 			glDepthMask(GL_TRUE);
 
 			glDisable(GL_CULL_FACE);
-			pathMaker.draw(view, projection);
+			//pathMaker.draw(view, projection);
 
 			KaczkaShader.use();
 
