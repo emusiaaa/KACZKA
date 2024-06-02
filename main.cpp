@@ -29,6 +29,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 void generateTexture(unsigned int& texture, const char* path);
+void loadCubemap(unsigned int& texture, std::vector<std::string> faces);
 
 Camera camera = Camera();
 int SCR_WIDTH = 800;
@@ -117,11 +118,23 @@ int main()
 		PathMaker pathMaker = PathMaker();
 		WaterDisturber waterDisturber = WaterDisturber();
 
-		unsigned int duckTexture, waterNormalsTexture, waterTEX;
+		unsigned int duckTexture, waterNormalsTexture, waterTEX, cubeMap;
 		generateTexture(duckTexture, "model/ducktex.jpg");
 		generateTexture(waterNormalsTexture, "model/normal2.png");
 		glGenTextures(1, &waterTEX);
 		glBindTexture(GL_TEXTURE_2D, waterTEX);
+
+		std::vector<std::string> faces
+		{
+			"model/skybox/right.jpg",
+			"model/skybox/left.jpg",
+			"model/skybox/top.jpg",
+			"model/skybox/bottom.jpg",
+			"model/skybox/front.jpg",
+			"model/skybox/back.jpg"
+		};
+		loadCubemap(cubeMap, faces);
+
 
 		// Room Planes
 		PUMA::Plane roomPlanes[6] = {
@@ -204,6 +217,31 @@ int main()
 			int jj = static_cast<int>(((-duck.translation.z + 250.f) / 500.0f) * 255.0f);
 			waterDisturber.disturb(jj, ii, waterTEX);
 
+			PhongShader.use();
+
+			PhongShader.setVec3("cameraPos", camera.position);
+			PhongShader.setMat4("view", view);
+			PhongShader.setMat4("proj", projection);
+
+			PhongShader.setVec3("ambientColor", ambientColor);
+			PhongShader.setVec3("light.position", sceneLight.position);
+			PhongShader.setVec3("light.diffuseColor", sceneLight.diffuseColor);
+			PhongShader.setVec3("light.specularColor", sceneLight.specularColor);
+
+			PhongShader.setVec3("material.ka", defaultMaterial.ka);
+			PhongShader.setVec3("material.kd", defaultMaterial.kd);
+			PhongShader.setVec3("material.ks", defaultMaterial.ks);
+			PhongShader.setFloat("material.shininess", defaultMaterial.shininess);
+
+			PhongShader.setVec3("objectColor", roomColor);
+			glDepthMask(GL_FALSE);
+			for (int i = 0; i < 6; i++)
+			{
+				PhongShader.setMat4("model", roomPlaneModels[i]);
+				roomPlanes[i].Draw(cubeMap);
+			}
+			glDepthMask(GL_TRUE);
+
 			pathMaker.draw(view, projection);
 
 			KaczkaShader.use();
@@ -248,30 +286,9 @@ int main()
 			//KaczkaShader.use();
 			KaczkaShader.setVec3("objectColor", water_color);
 			KaczkaShader.setMat4("model", water_mtx);
-			water.Draw(waterTEX);
+			water.Draw(waterTEX, GL_TEXTURE_2D);
 
-			PhongShader.use();
-
-			PhongShader.setVec3("cameraPos", camera.position);
-			PhongShader.setMat4("view", view);
-			PhongShader.setMat4("proj", projection);
-
-			PhongShader.setVec3("ambientColor", ambientColor);
-			PhongShader.setVec3("light.position", sceneLight.position);
-			PhongShader.setVec3("light.diffuseColor", sceneLight.diffuseColor);
-			PhongShader.setVec3("light.specularColor", sceneLight.specularColor);
-
-			PhongShader.setVec3("material.ka", defaultMaterial.ka);
-			PhongShader.setVec3("material.kd", defaultMaterial.kd);
-			PhongShader.setVec3("material.ks", defaultMaterial.ks);
-			PhongShader.setFloat("material.shininess", defaultMaterial.shininess);
-
-			PhongShader.setVec3("objectColor", roomColor);
-			for (int i = 0; i < 6; i++)
-			{
-				PhongShader.setMat4("model", roomPlaneModels[i]);
-				roomPlanes[i].Draw();
-			}
+			
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
@@ -364,4 +381,34 @@ void generateTexture(unsigned int& texture, const char* path) {
 	}
 	stbi_image_free(data);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void loadCubemap(unsigned int& texture, std::vector<std::string> faces)
+{
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }

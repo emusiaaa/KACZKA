@@ -29,10 +29,10 @@ namespace PUMA
 		glBindVertexArray(0);
 	}
 
-	void Plane::Draw(unsigned int& texture) const
+	void Plane::Draw(unsigned int& texture, GLenum textureType) const
 	{
 		glBindVertexArray(m_gl_VAO);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(textureType, texture);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 		glBindTexture(GL_TEXTURE_2D, 0);
