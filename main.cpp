@@ -208,7 +208,7 @@ int main()
 			glm::mat4 view = camera.viewMatrix();
 			glm::mat4 projection = camera.projectionMatrix(SCR_HEIGHT, SCR_WIDTH);
 
-			t += deltaTime / 4.f;
+			t += deltaTime / 3.f;
 			duck.translation = pathMaker.calculateCurrentPosition(t);
 			glm::vec3 tangent = pathMaker.bezierTangent(t);
 			glm::mat4 rotationMatrix = pathMaker.alignModelToVector(tangent);
@@ -234,14 +234,16 @@ int main()
 			PhongShader.setFloat("material.shininess", defaultMaterial.shininess);
 
 			PhongShader.setVec3("objectColor", roomColor);
+			glEnable(GL_CULL_FACE);
 			glDepthMask(GL_FALSE);
 			for (int i = 0; i < 6; i++)
 			{
-				PhongShader.setMat4("model", roomPlaneModels[i]);
+				PhongShader.setMat4("model", roomPlaneModels[i] * Scale(250));
 				roomPlanes[i].Draw(cubeMap);
 			}
 			glDepthMask(GL_TRUE);
 
+			glDisable(GL_CULL_FACE);
 			pathMaker.draw(view, projection);
 
 			KaczkaShader.use();
@@ -282,10 +284,11 @@ int main()
 			WaterShader.setFloat("material.shininess", defaultMaterial.shininess);
 
 			WaterShader.setVec3("objectColor", water_color);
-			WaterShader.setMat4("model", water_mtx);
+			WaterShader.setMat4("model", water_mtx * Scale(250));
 			//KaczkaShader.use();
-			KaczkaShader.setVec3("objectColor", water_color);
-			KaczkaShader.setMat4("model", water_mtx);
+			//KaczkaShader.setVec3("objectColor", water_color);
+			//KaczkaShader.setMat4("model", water_mtx);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
 			water.Draw(waterTEX, GL_TEXTURE_2D);
 
 			

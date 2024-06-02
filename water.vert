@@ -11,6 +11,7 @@ uniform mat4 proj;
 layout (location = 0) out b_VS_out
 {
     vec3 worldPos;
+    vec3 localPos;
     vec3 worldNorm;
     vec4 color;
     vec2 TexCoord;
@@ -21,6 +22,7 @@ void main()
     vec4 worldPos = model * vec4(inPos, 1.0f);
 
     VS_out.worldPos = vec3(worldPos);
+    VS_out.localPos = inPos;
 
     //VS_out.worldNorm = mat3(transpose(inverse(model))) * inNorm;
     VS_out.worldNorm = vec3(model * vec4(inNorm, 0));
