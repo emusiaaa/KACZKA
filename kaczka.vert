@@ -3,6 +3,7 @@
 layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNorm;
 layout (location = 2) in vec2 aTexCoord;
+layout (location = 3) in vec3 aTangent;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -14,6 +15,7 @@ layout (location = 0) out b_VS_out
     vec3 worldNorm;
     vec4 color;
     vec2 TexCoord;
+    vec3 tangent;
 } VS_out;
 
 void main()
@@ -28,4 +30,5 @@ void main()
     gl_Position = proj * view * worldPos;
     VS_out.TexCoord = aTexCoord;
     VS_out.color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    VS_out.tangent = mat3(model) * aTangent;
 }

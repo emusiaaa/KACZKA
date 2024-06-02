@@ -38,6 +38,7 @@ namespace KACZKA
 
 			std::vector<glm::vec3>		m_mesh_vertexPositions;
 			std::vector<glm::vec3>		m_mesh_normals;
+			std::vector<glm::vec3>		m_mesh_tangents;
 			std::vector<glm::vec2>		m_mesh_texCoords;
 			std::vector<Triangle>		m_mesh_triangles;
 
@@ -49,6 +50,7 @@ namespace KACZKA
 			GLuint m_gl_VBO; // Vertex Buffer Object
 			GLuint m_gl_NBO; // Normal Buffer Object
 			GLuint m_gl_TBO; // Texture Buffer Object
+			GLuint m_gl_TGBO;
 			GLuint m_gl_EBO;  
 
 		public:

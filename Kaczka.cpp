@@ -25,6 +25,7 @@ namespace KACZKA
 		glDeleteBuffers(1, &m_gl_VBO);
 		glDeleteBuffers(1, &m_gl_NBO);
 		glDeleteBuffers(1, &m_gl_TBO);
+		glDeleteBuffers(1, &m_gl_TGBO);
 		glDeleteBuffers(1, &m_gl_EBO);
 	}
 
@@ -105,6 +106,38 @@ namespace KACZKA
 		}
 
 		inputFile.close();
+
+		m_mesh_tangents.resize(m_mesh_vertexPositions.size());
+		for (int i = 0; i < m_mesh_triangles.size(); ++i) {
+			auto t = m_mesh_triangles[i];
+			auto v0 = m_mesh_vertexPositions[t.A];
+			auto v1 = m_mesh_vertexPositions[t.B];
+			auto v2 = m_mesh_vertexPositions[t.C];
+
+			auto t0 = m_mesh_texCoords[t.A];
+			auto t1 = m_mesh_texCoords[t.B];
+			auto t2 = m_mesh_texCoords[t.C];
+
+			glm::vec3 edge1 = v1 - v0;
+			glm::vec3 edge2 = v2 - v0;
+			glm::vec2 deltaUV1 = t1 - t0;
+			glm::vec2 deltaUV2 = t2 - t0;
+
+			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+			glm::vec3 tangent;
+
+			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+			m_mesh_tangents[t.A] += tangent;
+			m_mesh_tangents[t.B] += tangent;
+			m_mesh_tangents[t.C] += tangent;
+		}
+		for (int i = 0; i < m_mesh_tangents.size(); ++i) {
+			m_mesh_tangents[i] = glm::normalize(m_mesh_tangents[i]);
+		}
 	}
 
 	void Kaczka::InitGL()
@@ -114,6 +147,7 @@ namespace KACZKA
 		glGenBuffers(1, &m_gl_VBO);
 		glGenBuffers(1, &m_gl_NBO);
 		glGenBuffers(1, &m_gl_TBO);
+		glGenBuffers(1, &m_gl_TGBO);
 		glGenBuffers(1, &m_gl_EBO);
 
 		// Populate buffers with data
@@ -125,6 +159,9 @@ namespace KACZKA
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_gl_TBO);
 		glBufferData(GL_ARRAY_BUFFER, m_mesh_texCoords.size() * sizeof(glm::vec2), m_mesh_texCoords.data(), GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_gl_TGBO);
+		glBufferData(GL_ARRAY_BUFFER, m_mesh_tangents.size() * sizeof(glm::vec3), m_mesh_tangents.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_gl_EBO);
 		glBufferData(GL_ARRAY_BUFFER, m_mesh_triangles.size() * sizeof(Triangle), m_mesh_triangles.data(), GL_STATIC_DRAW);
@@ -139,10 +176,13 @@ namespace KACZKA
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glBindBuffer(GL_ARRAY_BUFFER, m_gl_TBO);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glBindBuffer(GL_ARRAY_BUFFER, m_gl_TGBO);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(3);
 
 		// Unbind everything 
 		glBindVertexArray(0);

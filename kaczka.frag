@@ -26,6 +26,7 @@ layout (location = 0) in b_FS_in
     vec3 fragWorldNorm;
     vec4 color;
     vec2 TexCoord;
+    vec3 tangent;
 } FS_in;
 
 out vec4 FragColor;
@@ -56,7 +57,8 @@ vec4 ComputePhongIllumination()
     vec3 R = reflect(-L, N);
     vec3 V = normalize(cameraPos - FS_in.fragWorldPos);
     vec3 H = normalize(L + V);
-    vec3 T = normalize(cross(N, vec3(1,0,0)));
+    vec3 T = FS_in.tangent;
+    //vec3 T = normalize(cross(N, vec3(1,0,0)));
     vec3 anisotropic = material.ks * light.specularColor * pow(sqrt(1-pow(dot(T, H),2)), material.shininess);
 
     //return vec4(1.0,0.5,1.0f,1.0f);
