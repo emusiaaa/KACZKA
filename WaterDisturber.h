@@ -98,7 +98,7 @@ public:
 		float p = dis1(gen);
 		if(p > 0.05f)
 		{
-			int ii = 230;
+			int ii = dis(gen);
 			int jj = dis(gen);
 			Z_N[ii][jj] -= .25f;
 		}
