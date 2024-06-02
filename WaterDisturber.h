@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_PERLIN_IMPLEMENTATION
 
@@ -96,17 +96,12 @@ public:
 				Z_N[i][j] = Z_N_plus_1[i][j];
 			}
 		}
-		
-		std::vector<unsigned char> image = convertHeightMapToImage();
+		createNormalTexture(calculateNormals(), tex);
+		/*std::vector<unsigned char> image = convertHeightMapToImage();
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, N, N, 0, GL_RED, GL_UNSIGNED_BYTE, image.data());
 		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		/*if (stbi_write_png("heightmap2.png", N, N, 1, image.data(), N) == 0) {
-			std::cout << "Failed to write image" << std::endl;
-			return;
-		}*/
-
+		glBindTexture(GL_TEXTURE_2D, 0);*/
 	}
 	void disturb2(unsigned int& tex) {
 		std::random_device rd;
@@ -127,11 +122,13 @@ public:
 				Z_N[i][j] = Z_N_plus_1[i][j];
 			}
 		}
-		std::vector<unsigned char> image = convertHeightMapToImage();
+		
+		//createNormalTexture(calculateNormals(), tex);
+		/*std::vector<unsigned char> image = convertHeightMapToImage();
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, N, N, 0, GL_RED, GL_UNSIGNED_BYTE, image.data());
 		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);*/
 	}
 
 	std::vector<unsigned char> convertHeightMapToImage() {
@@ -144,5 +141,106 @@ public:
 			}
 		}
 		return image;
+	}
+
+	std::vector<std::vector<glm::vec3>> calculateNormals() {
+		static_assert(N > 1, "N too smol");
+		auto normals = std::vector<std::vector<glm::vec3>>(N, std::vector<glm::vec3>(N));
+		for (int y = 0; y < N; ++y) {
+			normals[y][0].x = (Z_N_plus_1[y][0] + Z_N_plus_1[y][1]) / 4.0f;
+			for (int x = 1; x < N - 1 ; ++x) {
+				normals[y][x].x = (Z_N_plus_1[y][x - 1] + Z_N_plus_1[y][x + 1]) / 2.0f;
+			}
+			normals[y][N - 1].x = (Z_N_plus_1[y][N - 2] + Z_N_plus_1[y][N - 1]) / 4.0f;
+		}
+		for (int x = 0; x < N; ++x) {
+			normals[0][x].z = (Z_N_plus_1[0][x] + Z_N_plus_1[1][x]) / 4.0f;
+			for (int y = 1; y < N - 1; ++y) {
+				normals[y][x].z = (Z_N_plus_1[y - 1][x] + Z_N_plus_1[y + 1][x]) / 2.0f;
+			}
+			normals[0][x].z = (Z_N_plus_1[N - 2][x] + Z_N_plus_1[N - 1][x]) / 4.0f;
+		}
+		for (int x = 0; x < N; ++x) {
+			for (int y = 0; y < N; ++y) {
+				normals[y][x].y = 1.0f;
+			}
+		}
+		for (auto& vecs : normals) {
+			for (auto& vec : vecs) {
+				const float mul = 1.0f / std::sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+				vec.x *= mul;
+				vec.y *= mul;
+				vec.z *= mul;
+				std::swap(vec.y, vec.z);
+			}
+		}
+		return normals;
+	}
+
+	glm::u8vec3 encodeNormal(const glm::vec3& normal) {
+		glm::u8vec3 encoded;
+		encoded.r = static_cast<unsigned char>((normal.x + 1.0f) * 0.5f * 255.0f);
+		encoded.g = static_cast<unsigned char>((normal.y + 1.0f) * 0.5f * 255.0f);
+		encoded.b = static_cast<unsigned char>((normal.z + 1.0f) * 0.5f * 255.0f);
+		return encoded;
+	}
+
+	void createNormalTexture(const std::vector<std::vector<glm::vec3>>& normals, unsigned int& tex) {
+		int height = normals.size();
+		int width = normals[0].size();
+		std::vector<float> data(N * N * 4);
+		// Flatten the 2D vector to a 1D array and encode normals to 8-bit values
+		std::vector<glm::u8vec3> normalMap(width * height);
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+				int index = (y * N + x) * 4;
+				//data[index + 0] = normals[y][x].x *0.5f + 0.5f;	// R
+				//data[index + 1] = normals[y][x].y *0.5f + 0.5f; // waterHeights_current[y][x];//rand()/(float) RAND_MAX; // G
+				//data[index + 2] = normals[y][x].z *0.5f + 0.5f;	// B
+				//data[index + 3] = 1.f;	// A
+				normalMap[y * width + x] = encodeNormal(normals[y][x]);
+			}
+		}
+
+		//// Create and upload the texture
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, normalMap.data());
+		glGenerateMipmap(GL_TEXTURE_2D);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		//std::vector<float> data(N * N * 4); // 4 kana³y (RGBA)
+		//for (int y = 1; y < N - 1; y++) {
+		//	for (int x = 1; x < N - 1; x++) {
+		//		float heightL = Z_N_plus_1[y][x - 1];
+		//		float heightR = Z_N_plus_1[y][x + 1];
+		//		float heightD = Z_N_plus_1[y - 1][x];
+		//		float heightU = Z_N_plus_1[y + 1][x];
+
+		//		glm::vec3 dx = glm::normalize(glm::vec3(1.0f, heightR - heightL, 0.0f));
+		//		glm::vec3 dz = glm::normalize(glm::vec3(0.0f, heightU - heightD, 1.0));
+		//		glm::vec3 normal = glm::normalize(glm::cross(dz, dx));
+
+		//		normal = normal * 0.5f + 0.5f;
+		//		int index = (y * N + x) * 4;
+		//		data[index + 0] = normal.x;	// R
+		//		data[index + 1] = normal.y; // waterHeights_current[y][x];//rand()/(float) RAND_MAX; // G
+		//		data[index + 2] = normal.z;	// B
+		//		data[index + 3] = 1.0f;	// A
+		//	}
+		//}
+		//data[0] = 0.5f;	// R
+		//data[1] = 1.0f; // waterHeights_current[y][x];//rand()/(float) RAND_MAX; // G
+		//data[2] = 0.5f;	// B
+		//data[3] = 1.0f;	// A
+
+		//glBindTexture(GL_TEXTURE_2D, tex);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, data.data());
+		//glGenerateMipmap(GL_TEXTURE_2D);
+		///*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);*/
+		//glBindTexture(GL_TEXTURE_2D, 0);
+
 	}
 };

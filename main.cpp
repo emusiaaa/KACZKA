@@ -119,7 +119,7 @@ int main()
 
 		unsigned int duckTexture, waterNormalsTexture, waterTEX;
 		generateTexture(duckTexture, "model/ducktex.jpg");
-		generateTexture(waterNormalsTexture, "heightmap2.png");
+		generateTexture(waterNormalsTexture, "model/normal2.png");
 		glGenTextures(1, &waterTEX);
 		glBindTexture(GL_TEXTURE_2D, waterTEX);
 
@@ -195,7 +195,7 @@ int main()
 			glm::mat4 view = camera.viewMatrix();
 			glm::mat4 projection = camera.projectionMatrix(SCR_HEIGHT, SCR_WIDTH);
 
-			t += deltaTime / 5.f;
+			t += deltaTime / 4.f;
 			duck.translation = pathMaker.calculateCurrentPosition(t);
 			glm::vec3 tangent = pathMaker.bezierTangent(t);
 			glm::mat4 rotationMatrix = pathMaker.alignModelToVector(tangent);
@@ -245,7 +245,7 @@ int main()
 
 			WaterShader.setVec3("objectColor", water_color);
 			WaterShader.setMat4("model", water_mtx);
-			KaczkaShader.use();
+			//KaczkaShader.use();
 			KaczkaShader.setVec3("objectColor", water_color);
 			KaczkaShader.setMat4("model", water_mtx);
 			water.Draw(waterTEX);
