@@ -182,7 +182,7 @@ int main()
 
 		// Light
 		Light sceneLight;
-		sceneLight.position			= glm::vec3(-75.5f, 175.0f, 75.0f);
+		sceneLight.position			= glm::vec3(-75.5f, 35.0f, 75.0f);
 		sceneLight.diffuseColor		= glm::vec3(1.0f, 1.0f, 1.0f);
 		sceneLight.specularColor	= glm::vec3(1.0f, 1.0f, 1.0f);
 
